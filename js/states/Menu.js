@@ -3,7 +3,7 @@ Menu = function(game){
 
 Menu.prototype ={
   create:function(){
-    this.bg = this.add.tileSprite(0,0,800,600,'land');
+    this.bg = this.add.tileSprite(0,0,800,600,'background');
     this.logo = this.add.sprite(0,0,'logo');
     this.instructions = this.add.button(0,0,'instructions-btn',this.instructionsBtn,this,1,0,2);
     this.start = this.add.button(0,0,'start-btn', this.startGame, this, 1,0,2);

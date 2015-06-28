@@ -10,6 +10,7 @@ Preloader.prototype = {
     this.load.spritesheet('retry-btn','assets/images/instructions-btn.png', 188, 41);
     this.load.image('life','assets/images/life.png');
     this.load.image('nolife','assets/images/nolife.png');
+    this.load.image('logo','assets/images/logo.png');
 
     for (var i = 1; i <= 11; i++)
     {

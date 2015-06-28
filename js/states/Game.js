@@ -41,7 +41,7 @@ Game.prototype ={
     }
 
     this.player = this.add.sprite(200, 32, 'player');
-    
+
     this.lives = this.add.group();
 
     for (i = 0; i < 5; i++) {
@@ -62,16 +62,16 @@ Game.prototype ={
      *this.foreground = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'foreground');
      *this.foreground.autoScroll(-60, 0);
      */
-    var fontStyle = {font:'bold 24px Arial', fill:'#A00', stroke: "#333", strokeThickness: 5};
-    this.weaponName = this.add.text(8, 364, "ENTER = Next Weapon", fontStyle);
+     var fontStyle = {font:'bold 24px Arial', fill:'#A00', stroke: "#333", strokeThickness: 5};
+     this.weaponName = this.add.text(8, 364, "ENTER = Next Weapon", fontStyle);
 
-    //  Cursor keys to fly + space to fire
-    this.cursors = this.input.keyboard.createCursorKeys();
+     //  Cursor keys to fly + space to fire
+     this.cursors = this.input.keyboard.createCursorKeys();
 
-    this.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ]);
+     this.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ]);
 
-    var changeKey = this.input.keyboard.addKey(Phaser.Keyboard.ENTER);
-    changeKey.onDown.add(this.nextWeapon, this);
+     var changeKey = this.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+     changeKey.onDown.add(this.nextWeapon, this);
   },
   update:function(){
     this.player.body.velocity.set(0);
@@ -138,4 +138,4 @@ Game.prototype ={
   },
   resetData: function () {
   }
-  };
+};
