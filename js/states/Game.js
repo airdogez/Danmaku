@@ -10,6 +10,7 @@ Game = function(game){
   this.currentWeapon = 0;
   this.weaponName = null;
 
+  this.enemies = null;
   this.lives = null;
   this.life = 5;
 
@@ -42,6 +43,8 @@ Game.prototype ={
 
     this.player = this.add.sprite(200, 32, 'player');
 
+    var fontStyle = {font:'bold 24px Arial', fill:'#A00', stroke: "#333", strokeThickness: 5};
+
     this.lives = this.add.group();
 
     for (i = 0; i < 5; i++) {
@@ -53,6 +56,7 @@ Game.prototype ={
       this.lives.add(this.heart);
     }
     this.lives.fixedToCamera = true;
+    this.enemies = this.add.group();
 
     this.physics.arcade.enable(this.player);
 
@@ -62,19 +66,16 @@ Game.prototype ={
      *this.foreground = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'foreground');
      *this.foreground.autoScroll(-60, 0);
      */
-     var fontStyle = {font:'bold 24px Arial', fill:'#A00', stroke: "#333", strokeThickness: 5};
-     this.weaponName = this.add.text(8, 364, "ENTER = Next Weapon", fontStyle);
 
      //  Cursor keys to fly + space to fire
      this.cursors = this.input.keyboard.createCursorKeys();
 
      this.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ]);
 
-     var changeKey = this.input.keyboard.addKey(Phaser.Keyboard.ENTER);
-     changeKey.onDown.add(this.nextWeapon, this);
   },
   update:function(){
     this.player.body.velocity.set(0);
+    this.generateEnemy();
 
     if (this.cursors.left.isDown)
     {
@@ -132,9 +133,9 @@ Game.prototype ={
   },
   fire:function(){
   },
-  loseHeart: function (tank) {
+  loseHeart: function (player) {
   },
-  createWave: function (enemies) {
+  generateEnemy: function () {
   },
   resetData: function () {
   }
