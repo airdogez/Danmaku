@@ -1,197 +1,141 @@
- Game = function(game){
-   this.speed =0;
-   this.fireRate = 100;
-   this.tanks = [];
-   this.nextFire = 0;
-   this.bullets = null;
-   this.score = 0;
-   this.timer = null;
-   this.score = 0;
-   this.enemies = 10;
-   this.waveEnemies = 10;
-   this.Level = null;
- };
+Game = function(game){
+  this.background = null;
+  this.foreground = null;
 
- Game.prototype ={
-   create:function(){
-     var fontStyleHeader = {font:'bold 24px Arial', fill:'#A00', stroke: "#333", strokeThickness: 5};
-     var fontStyleText = {font:'20px Arial', fill:'#FFFFFF', stroke: "#333", strokeThickness: 5, wordWrap: true, wordWrapWidth: 700};
+  this.player = null;
+  this.cursors = null;
+  this.speed = 300;
 
-     this.world.setBounds(-1000,-1000,2000,2000);
-     this.land = this.add.tileSprite(0,0,800,600,'land');
+  this.weapons = [];
+  this.currentWeapon = 0;
+  this.weaponName = null;
 
-     this.tank = this.add.sprite(0,0,'tank','tank1');
-     this.tank.anchor.setTo(0.5,0.5);
-     this.tank.x = 400;
-     this.tank.y = 300;
-     this.tank.life = 3;
-     this.tank.is_dead = false;
+  this.lives = null;
+  this.life = 5;
 
-     this.livesText =  this.add.text(100,35, 'Lives:', fontStyleHeader);
-     this.livesText.anchor.setTo(0.5,0.5);
-     this.livesText.fixedToCamera = true;
-     var i = 0;
-     this.lives = this.add.group();
-     for (i = 0; i < 3 ; i++) {
-       this.heart = this.add.sprite(0,0,'live');
-       this.heart.x = 155 + 40*i;
-       this.heart.y = 35;
-       this.heart.width = this.heart.height = 30;
-       this.heart.anchor.setTo(0.5,0.5);
-       this.lives.add(this.heart);
-     }
-     this.lives.fixedToCamera = true;
+};
 
-     this.scoreText = this.add.text(350, 35,'Score:', fontStyleHeader);
-     this.scoreText.anchor.setTo(0.5,0.5);
-     this.scoreText.fixedToCamera = true;
-     this.scoreTotal = this.add.text(420,35,this.score, fontStyleText);
-     this.scoreTotal.anchor.setTo(0.5,0.5);
-     this.scoreTotal.fixedToCamera = true;
+Game.prototype ={
+  create:function(){
+    this.background = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'background');
+    this.background.autoScroll(0, -40);
 
-     this.timeText = this.add.text(600,35,'Time:', fontStyleHeader);
-     this.timeText.fixedToCamera = true; 
-     this.timeText.anchor.setTo(0.5,0.5);
-     this.timerText = this.add.text(680,35,'00:00', fontStyleText);
-     this.timerText.fixedToCamera = true;
-     this.timerText.anchor.setTo(0.5,0.5);
+    this.weapons.push(new Weapon.SingleBullet(this.game));
+    this.weapons.push(new Weapon.FrontAndBack(this.game));
+    this.weapons.push(new Weapon.ThreeWay(this.game));
+    this.weapons.push(new Weapon.EightWay(this.game));
+    this.weapons.push(new Weapon.ScatterShot(this.game));
+    this.weapons.push(new Weapon.Beam(this.game));
+    this.weapons.push(new Weapon.SplitShot(this.game));
+    this.weapons.push(new Weapon.Pattern(this.game));
+    this.weapons.push(new Weapon.Rockets(this.game));
+    this.weapons.push(new Weapon.ScaleBullet(this.game));
+    this.weapons.push(new Weapon.Combo1(this.game));
+    this.weapons.push(new Weapon.Combo2(this.game));
 
-     this.physics.enable(this.tank,Phaser.Physics.ARCADE);
-     this.tank.body.collideWorldBounds = true;
-     this.canon = this.add.sprite(0,0,'tank','turret');
-     this.canon.anchor.setTo(0.3,0.5);
-     this.canon.x = this.tank.x;
-     this.canon.y = this.tank.y;
-     this.keys = this.input.keyboard.createCursorKeys();
+    this.currentWeapon = 0;
 
-     this.camera.follow(this.tank);
-     this.land.fixedToCamera = true;
+    for (var i = 1; i < this.weapons.length; i++)
+    {
+      this.weapons[i].visible = false;
+    }
 
-     this.bullets = this.add.group();
-     this.bullets.enableBody = true;
-     this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
-     this.bullets.createMultiple(20, 'bullet', 0, false);
-     this.bullets.setAll('anchor.x', 0.5);
-     this.bullets.setAll('anchor.y', 0.5);
-     this.bullets.setAll('outOfBoundsKill', true);
-     this.bullets.setAll('checkWorldBounds', true);
+    this.player = this.add.sprite(200, 32, 'player');
+    
+    this.lives = this.add.group();
 
-     this.enemyBullets = this.add.group();
-     this.enemyBullets.enableBody = true;
-     this.enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
-     this.enemyBullets.createMultiple(100,'bullet',0,false);
+    for (i = 0; i < 5; i++) {
+      this.heart = this.add.sprite(0,0,'life');
+      this.heart.x = 155 + 40*i;
+      this.heart.y = 35;
+      this.heart.width = this.heart.height = 30;
+      this.heart.anchor.setTo(0.5,0.5);
+      this.lives.add(this.heart);
+    }
+    this.lives.fixedToCamera = true;
 
-     this.enemyBullets.setAll('anchor.x', 0.5);
-     this.enemyBullets.setAll('anchor.y', 0.5);
-     this.enemyBullets.setAll('outOfBoundsKill', true);
-     this.enemyBullets.setAll('checkWorldBounds', true);
+    this.physics.arcade.enable(this.player);
 
-     this.createWave(this.waveEnemies);
+    this.player.body.collideWorldBounds = true;
 
-   },
-   update:function(){
-     this.timer += this.time.elapsed;
+    /*
+     *this.foreground = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'foreground');
+     *this.foreground.autoScroll(-60, 0);
+     */
+    var fontStyle = {font:'bold 24px Arial', fill:'#A00', stroke: "#333", strokeThickness: 5};
+    this.weaponName = this.add.text(8, 364, "ENTER = Next Weapon", fontStyle);
 
-     var minutes = Math.floor(this.timer / 60000) % 60;
-     var seconds = Math.floor(this.timer / 1000) % 60;
+    //  Cursor keys to fly + space to fire
+    this.cursors = this.input.keyboard.createCursorKeys();
 
-     if (minutes < 10){
-       minutes = '0' + minutes;
-     }
-     if (seconds < 10){
-       seconds = '0' + seconds;
-     }
+    this.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ]);
 
-     this.timerText.text = minutes + ':' + seconds;
+    var changeKey = this.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+    changeKey.onDown.add(this.nextWeapon, this);
+  },
+  update:function(){
+    this.player.body.velocity.set(0);
 
-     this.canon.rotation = this.physics.arcade.angleToPointer(this.canon);
-     if(this.keys.left.isDown || this.input.keyboard.isDown(Phaser.Keyboard.A)){
-       this.tank.angle -= 4;
-     }
-     if(this.keys.right.isDown || this.input.keyboard.isDown(Phaser.Keyboard.D)){
-       this.tank.angle += 4;
-     }
-     if(this.keys.up.isDown || this.input.keyboard.isDown(Phaser.Keyboard.W)){
-       this.speed = 200;
-     }else{
-       this.speed -= 4;
-     }
-     if(this.speed>0){
-       this.physics.arcade.velocityFromRotation(this.tank.rotation,
-         this.speed,this.tank.body.velocity);
-     }
-     if(this.input.activePointer.isDown){
-       this.fire();
-     }
-     this.canon.x= this.tank.x;
-     this.canon.y= this.tank.y;
-     this.land.tilePosition.x = -this.camera.x;
-     this.land.tilePosition.y = -this.camera.y;
+    if (this.cursors.left.isDown)
+    {
+      this.player.body.velocity.x = -this.speed;
+    }
+    else if (this.cursors.right.isDown)
+    {
+      this.player.body.velocity.x = this.speed;
+    }
 
-     this.scoreTotal.text = this.score;
+    if (this.cursors.up.isDown)
+    {
+      this.player.body.velocity.y = -this.speed;
+    }
+    else if (this.cursors.down.isDown)
+    {
+      this.player.body.velocity.y = this.speed;
+    }
 
-     for(var i = 0;i<this.tanks.length;i++){
-       this.tanks[i].update();
-       this.physics.arcade.collide(this.tank,this.tanks[i].tank);
-       this.physics.arcade.overlap(this.bullets,this.tanks[i].tank,
-         this.hitEnemy,null,this);
-     }
-     this.physics.arcade.overlap(this.enemyBullets, 
-       this.tank,this.hitPlayer, null, this);
+    if (this.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR))
+    {
+      this.weapons[this.currentWeapon].fire(this.player);
+    }
+  },
+  nextWeapon: function () {
 
-     if(this.enemies === 0){
-       this.waveEnemies += 5;
-       this.createWave(this.waveEnemies);
-       this.enemies = this.waveEnemies;
-     }
+    //  Tidy-up the current weapon
+    if (this.currentWeapon > 9)
+    {
+      this.weapons[this.currentWeapon].reset();
+    }
+    else
+    {
+      this.weapons[this.currentWeapon].visible = false;
+      this.weapons[this.currentWeapon].callAll('reset', null, 0, 0);
+      this.weapons[this.currentWeapon].setAll('exists', false);
+    }
 
-   },
-   hitPlayer:function(tank ,bullet){
-     this.loseHeart(tank);
-     if(tank.life === 0){
-       tank.kill();
-       this.canon.kill();
-       tank.is_dead = true;
-       this.resetData();
-       this.state.clearCurrentState();
-       this.state.start('GameOver');
-       //this.shadow.kill();
-     }
-     bullet.kill();
+    //  Activate the new one
+    this.currentWeapon++;
 
-   },
+    if (this.currentWeapon === this.weapons.length)
+    {
+      this.currentWeapon = 0;
+    }
 
-   hitEnemy:function(tank, bullet){
-     bullet.kill();
-     this.tanks[tank.name]._kill();
-     this.score += 100;
-     this.enemies--;
-   },
+    this.weapons[this.currentWeapon].visible = true;
 
+    this.weaponName.text = this.weapons[this.currentWeapon].name;
 
-   fire:function(){
-     if (this.time.now > this.nextFire)
-     {
-       this.nextFire = this.time.now + this.fireRate;
-
-       var bullet = this.bullets.getFirstExists(false);
-
-       bullet.reset(this.canon.x, this.canon.y);
-       bullet.rotation = this.physics.arcade.moveToPointer(bullet, 1000, this.input.activePointer);
-     }
-   },
-   loseHeart: function (tank) {
-     this.lives.getChildAt(tank.life-1).loadTexture('nolive');
-     tank.life--;
-   },
-   createWave: function (enemies) {
-     for (i = 0; i < enemies; i++)
-     {
-       this.tanks.push(new Tank(i, this, this.tank, this.enemyBullets, game.world.randomX, game.world.randomY));
-     }
-   },
-   resetData: function () {
-     this.score = 0;
-     this.timer = 0;
-   }
- };
+  },
+  hitPlayer:function(tank ,bullet){
+  },
+  hitEnemy:function(tank, bullet){
+  },
+  fire:function(){
+  },
+  loseHeart: function (tank) {
+  },
+  createWave: function (enemies) {
+  },
+  resetData: function () {
+  }
+  };

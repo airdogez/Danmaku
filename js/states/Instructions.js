@@ -3,12 +3,11 @@ Instructions = function (game) {
 
 Instructions.prototype = {
   create: function () {
-     this.background = this.add.tileSprite(0,0,800,600, 'land');
+     this.background = this.add.tileSprite(0,0,800,600, 'background');
 
 
-     var instrucction = "El juego consiste en sobrevivir la mayor cantidad de olas de tanques, cada ola incrementa en dificultad.";
-     instrucction += "\n\nEl jugador tendra 3 vidas y cada vez que elimine a un enemigo obtendra 100 puntos.";
-     instrucction += "\n\nSe rota con las flechas izquierda y derecha, avanza con la flecha arriba, se dispara con la barra epaciadora.";
+     var instrucction = "El jugador tiene 5 vidas, debera sobrevivir hasta el final del nivel";
+     instrucction += "\n\nSe mueve con el mouse y dispara con espacio.";
 
      var fontStyleHeader = {font:'bold 24px Arial', fill:'#AA0', stroke: "#333", strokeThickness: 5};
      var fontStyleText = {font:'20px Arial', fill:'#FFFFFF', stroke: "#333", strokeThickness: 5, wordWrap: true, wordWrapWidth: 700};
