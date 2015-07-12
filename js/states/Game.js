@@ -10,11 +10,13 @@ Game = function(game){
   this.currentWeapon = 0;
   this.weaponName = null;
 
-  this.enemies = null;
+  this.enemies = [];
+  this.enemyBullets = null;
   this.lives = null;
   this.life = 5;
 
   this.score = 0;
+  this.highScore = 100000;
 
 };
 
@@ -23,18 +25,20 @@ Game.prototype ={
     this.background = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'background');
     this.background.autoScroll(0, -40);
 
-    this.weapons.push(new Weapon.SingleBullet(this.game));
-    this.weapons.push(new Weapon.FrontAndBack(this.game));
-    this.weapons.push(new Weapon.ThreeWay(this.game));
-    this.weapons.push(new Weapon.EightWay(this.game));
-    this.weapons.push(new Weapon.ScatterShot(this.game));
-    this.weapons.push(new Weapon.Beam(this.game));
-    this.weapons.push(new Weapon.SplitShot(this.game));
-    this.weapons.push(new Weapon.Pattern(this.game));
-    this.weapons.push(new Weapon.Rockets(this.game));
-    this.weapons.push(new Weapon.ScaleBullet(this.game));
-    this.weapons.push(new Weapon.Combo1(this.game));
-    this.weapons.push(new Weapon.Combo2(this.game));
+    this.weapons.push(new Weapon.SingleBullet(game));
+    this.weapons.push(new Weapon.FrontAndBack(game));
+    this.weapons.push(new Weapon.ThreeWay(game));
+    this.weapons.push(new Weapon.EightWay(game));
+    this.weapons.push(new Weapon.ScatterShot(game));
+    this.weapons.push(new Weapon.Beam(game));
+    this.weapons.push(new Weapon.SplitShot(game));
+    this.weapons.push(new Weapon.Pattern(game));
+    this.weapons.push(new Weapon.Rockets(game));
+    this.weapons.push(new Weapon.ScaleBullet(game));
+    this.weapons.push(new Weapon.Combo1(game));
+    this.weapons.push(new Weapon.Combo2(game));
+
+    this.enemyBullets = new Weapon.SingleBullet(game);
 
     this.currentWeapon = 0;
 
@@ -54,18 +58,18 @@ Game.prototype ={
 
     for (i = 0; i < 5; i++) {
       this.heart = this.add.sprite(0,0,'life');
-      this.heart.x = 155 + 40*i;
+      this.heart.x = 50+ 20*i + 5;
       this.heart.y = 35;
-      this.heart.width = this.heart.height = 30;
+      this.heart.width = this.heart.height = 20;
       this.heart.anchor.setTo(0.5,0.5);
       this.lives.add(this.heart);
     }
     this.lives.fixedToCamera = true;
-    this.enemies = this.add.group();
 
     this.physics.arcade.enable(this.player);
 
     this.player.body.collideWorldBounds = true;
+    this.player.anchor.setTo(0.5,0.5);
 
     /*
      *this.foreground = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'foreground');
@@ -77,10 +81,16 @@ Game.prototype ={
 
      this.input.keyboard.addKeyCapture([ Phaser.Keyboard.SPACEBAR ]);
 
+     this.timerEnemies = this.game.time.create(false);
+     this.timerEnemies.loop(2000,this.createEnemy,this);
+     this.timerEnemies.start();
+
   },
   update:function(){
     this.player.body.velocity.set(0);
-    this.generateEnemy();
+    for(var i = 0; i < this.enemies.length; i++){
+      this.enemies[i].fire(game);
+    }
 
     if(game.input.mousePointer.isDown){
       this.physics.arcade.moveToPointer(this.player, 600);
@@ -141,15 +151,16 @@ Game.prototype ={
 
     this.weapons[this.currentWeapon].visible = true;
   },
-  hitPlayer:function(tank ,bullet){
+  hitPlayer:function(player,bullet){
   },
-  hitEnemy:function(tank, bullet){
+  hitEnemy:function(enemy, bullet){
   },
   fire:function(){
   },
   loseHeart: function (player) {
   },
-  generateEnemy: function () {
+  createEnemy: function () {
+    this.enemies.push(new Enemy.Basic(this, this.player, this.enemyBullets,3,game.width/2,10));
   },
   resetData: function () {
   }
