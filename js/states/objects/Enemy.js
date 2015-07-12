@@ -13,7 +13,7 @@ Enemy.Basic = function(game, player, bullets, health, x, y){
     this.nextFire = 0;
     this.alive = true;
 
-    this.enemy = game.add.sprite(x, y, 'enemy', 'enemy');
+    this.enemy = game.add.sprite(x, y, 'enemy');
 
     this.enemy.anchor.set(0.5);
 
@@ -45,11 +45,8 @@ Enemy.Basic.prototype.update = function(){
   y++;
 };
 
-Enemy.Basic.prototype.hit= function () {
-  if(this.health < 0){
-    this.enemy.kill();
-  }
-  this.health--;
+Enemy.Basic.prototype._kill = function () {
+  this.enemy.kill();
 };
 
 //Enemigo que se mueve en Seno

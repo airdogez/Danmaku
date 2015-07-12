@@ -11,6 +11,7 @@ Preloader.prototype = {
     this.load.image('life','assets/images/life.png');
     this.load.image('nolife','assets/images/nolife.png');
     this.load.image('logo','assets/images/logo.png');
+    this.load.image('enemy','assets/images/enemy.png');
 
     for (var i = 1; i <= 11; i++)
     {

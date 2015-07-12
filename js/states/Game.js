@@ -170,7 +170,8 @@ Game.prototype ={
   },
   hitEnemy:function(enemy, bullet){
     bullet.kill();
-   enemy.kill();
+    console.log(enemy);
+    enemy.kill();
   },
   fire:function(){
   },

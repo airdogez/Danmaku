@@ -20,6 +20,8 @@ Bullet.prototype.constructor = Bullet;
 
 Bullet.prototype.fire = function (x, y, angle, speed, gx, gy) {
 
+  gx = gx || 0;
+  gy = gy || 0;
 
   this.reset(x, y);
   this.scale.set(1);
