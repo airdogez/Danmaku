@@ -3,7 +3,7 @@ Instructions = function (game) {
 
 Instructions.prototype = {
   create: function () {
-     this.background = this.add.tileSprite(0,0,800,600, 'background');
+     this.background = this.add.tileSprite(0,0,game.width,game.height, 'background');
 
 
      var instrucction = "El jugador tiene 5 vidas, debera sobrevivir hasta el final del nivel";

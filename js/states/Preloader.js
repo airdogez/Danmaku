@@ -7,14 +7,14 @@ Preloader.prototype = {
     this.load.image('player','assets/images/player.png');
     this.load.spritesheet('start-btn','assets/images/start-btn.png', 125, 41);
     this.load.spritesheet('retry-btn','assets/images/retry-btn.png', 125, 41);
-    this.load.spritesheet('retry-btn','assets/images/instructions-btn.png', 188, 41);
+    this.load.spritesheet('instructions-btn','assets/images/instructions-btn.png', 188, 41);
     this.load.image('life','assets/images/life.png');
     this.load.image('nolife','assets/images/nolife.png');
     this.load.image('logo','assets/images/logo.png');
 
     for (var i = 1; i <= 11; i++)
     {
-      this.load.image('bullet' + i, 'assets/bullet' + i + '.png');
+      this.load.image('bullet' + i, 'assets/images/bullet' + i + '.png');
     }
 
   },

@@ -14,6 +14,8 @@ Game = function(game){
   this.lives = null;
   this.life = 5;
 
+  this.score = 0;
+
 };
 
 Game.prototype ={
@@ -41,7 +43,10 @@ Game.prototype ={
       this.weapons[i].visible = false;
     }
 
-    this.player = this.add.sprite(200, 32, 'player');
+    this.player = this.add.sprite(0, 0, 'player');
+    this.player.inputEnabled = true;
+    this.player.x = game.width/2;
+    this.player.y = game.height - this.player.height - 20;
 
     var fontStyle = {font:'bold 24px Arial', fill:'#A00', stroke: "#333", strokeThickness: 5};
 
@@ -77,6 +82,15 @@ Game.prototype ={
     this.player.body.velocity.set(0);
     this.generateEnemy();
 
+    if(game.input.mousePointer.isDown){
+      this.physics.arcade.moveToPointer(this.player, 600);
+      if(Phaser.Rectangle.contains(this.player.body,game.input.x,game.input.y)){
+        this.player.body.velocity.setTo(0,0);
+      }
+    } else{
+      this.player.body.velocity.setTo(0,0);
+    }
+
     if (this.cursors.left.isDown)
     {
       this.player.body.velocity.x = -this.speed;
@@ -95,9 +109,12 @@ Game.prototype ={
       this.player.body.velocity.y = this.speed;
     }
 
-    if (this.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR))
+    if (game.input.activePointer.isDown)
     {
       this.weapons[this.currentWeapon].fire(this.player);
+    }
+    if (this.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+      this.nextWeapon();
     }
   },
   nextWeapon: function () {
@@ -123,9 +140,6 @@ Game.prototype ={
     }
 
     this.weapons[this.currentWeapon].visible = true;
-
-    this.weaponName.text = this.weapons[this.currentWeapon].name;
-
   },
   hitPlayer:function(tank ,bullet){
   },

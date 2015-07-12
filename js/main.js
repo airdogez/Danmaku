@@ -1,4 +1,4 @@
-game = new Phaser.Game(800, 600, Phaser.AUTO);
+game = new Phaser.Game('100%', '100%', Phaser.AUTO);
 game.state.add('Boost', Boost);
 game.state.add('Preloader', Preloader);
 game.state.add('Menu', Menu);
