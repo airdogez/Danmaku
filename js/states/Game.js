@@ -7,6 +7,7 @@ Game = function(game){
   this.speed = 300;
 
   this.weapons = [];
+  this.weapon = null;
   this.currentWeapon = 0;
   this.weaponName = null;
 
@@ -37,6 +38,9 @@ Game.prototype ={
     this.weapons.push(new Weapon.ScaleBullet(game));
     this.weapons.push(new Weapon.Combo1(game));
     this.weapons.push(new Weapon.Combo2(game));
+
+
+    this.weapon = new Weapon.SingleBullet(game);
 
     this.enemyBullets = new Weapon.SingleBullet(game);
 
@@ -89,7 +93,9 @@ Game.prototype ={
   update:function(){
     this.player.body.velocity.set(0);
     for(var i = 0; i < this.enemies.length; i++){
-      this.enemies[i].fire(game);
+      this.enemies[i].fire();
+      this.physics.arcade.collide(this.player,this.enemies[i].enemy);
+      this.physics.arcade.overlap(this.weapon,this.enemies[i].enemy, this.hitEnemy,null,this);
     }
 
     if(game.input.mousePointer.isDown){
@@ -121,7 +127,8 @@ Game.prototype ={
 
     if (game.input.activePointer.isDown)
     {
-      this.weapons[this.currentWeapon].fire(this.player);
+      //this.weapons[this.currentWeapon].fire(this.player);
+      this.weapon.fire(this.player);
     }
     if (this.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
       this.nextWeapon();
@@ -154,6 +161,8 @@ Game.prototype ={
   hitPlayer:function(player,bullet){
   },
   hitEnemy:function(enemy, bullet){
+    bullet.kill();
+   enemy.kill();
   },
   fire:function(){
   },

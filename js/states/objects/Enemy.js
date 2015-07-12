@@ -45,6 +45,13 @@ Enemy.Basic.prototype.update = function(){
   y++;
 };
 
+Enemy.Basic.prototype.hit= function () {
+  if(this.health < 0){
+    this.enemy.kill();
+  }
+  this.health--;
+};
+
 //Enemigo que se mueve en Seno
 //Enemigo que se mueve en Coseno
 //etc...
