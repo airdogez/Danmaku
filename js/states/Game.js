@@ -55,6 +55,7 @@ Game.prototype ={
     this.player.inputEnabled = true;
     this.player.x = game.width/2;
     this.player.y = game.height - this.player.height - 20;
+    this.player.health = 5;
 
     var fontStyle = {font:'bold 24px Arial', fill:'#A00', stroke: "#333", strokeThickness: 5};
 
@@ -97,6 +98,7 @@ Game.prototype ={
       this.physics.arcade.collide(this.player,this.enemies[i].enemy);
       this.physics.arcade.overlap(this.weapon,this.enemies[i].enemy, this.hitEnemy,null,this);
     }
+    this.physics.arcade.overlap(this.enemyBullets,this.player, this.hitPlayer,null,this);
 
     if(game.input.mousePointer.isDown){
       this.physics.arcade.moveToPointer(this.player, 600);
@@ -159,6 +161,12 @@ Game.prototype ={
     this.weapons[this.currentWeapon].visible = true;
   },
   hitPlayer:function(player,bullet){
+    if(this.player.health < 0){
+      this.state.start('GameOver',true,false);
+    }
+    this.player.health--;
+    console.log(this.player.health);
+    bullet.kill();
   },
   hitEnemy:function(enemy, bullet){
     bullet.kill();
