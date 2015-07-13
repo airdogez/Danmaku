@@ -13,36 +13,58 @@ Game = function(game){
 
   this.enemies = [];
   this.enemyBullets = null;
+  this.enemyBullets2 = null;
   this.lives = null;
   this.life = 5;
 
+  this.powerups = null;
+
   this.score = 0;
   this.highScore = 100000;
+
+  this.enemyCount = 20;
+
+  this.level = 0;
+
+  this.enemySprite = 'enemy';
 
 };
 
 Game.prototype ={
   create:function(){
+
+    this.waitTimer = this.time.create(false);
+    var fontStyleHeader = {
+      font: 'bold 24px Arial',
+      fill: '#A00',
+      stroke: "#333",
+      strokeThickness: 5
+    };
+    var fontStyleLevel = {
+      font: 'bold 30px Arial',
+      fill: 'white',
+      stroke: 'red',
+      strokeThickness: 12
+    };
+    var fontStyleText = {
+      font: '20px Arial',
+      fill: '#FFFFFF',
+      stroke: "#333",
+      strokeThickness: 5,
+      wordWrap: true,
+      wordWrapWidth: 700
+    };
+
     this.background = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'background');
     this.background.autoScroll(0, -40);
 
-    this.weapons.push(new Weapon.SingleBullet(game));
-    this.weapons.push(new Weapon.FrontAndBack(game));
-    this.weapons.push(new Weapon.ThreeWay(game));
-    this.weapons.push(new Weapon.EightWay(game));
-    this.weapons.push(new Weapon.ScatterShot(game));
-    this.weapons.push(new Weapon.Beam(game));
-    this.weapons.push(new Weapon.SplitShot(game));
-    this.weapons.push(new Weapon.Pattern(game));
-    this.weapons.push(new Weapon.Rockets(game));
-    this.weapons.push(new Weapon.ScaleBullet(game));
-    this.weapons.push(new Weapon.Combo1(game));
-    this.weapons.push(new Weapon.Combo2(game));
-
+    this.powerups = this.add.group();
 
     this.weapon = new Weapon.SingleBullet(game);
 
     this.enemyBullets = new Weapon.SingleBullet(game);
+
+    this.enemySprite = 'enemy';
 
     this.currentWeapon = 0;
 
@@ -71,6 +93,26 @@ Game.prototype ={
     }
     this.lives.fixedToCamera = true;
 
+    this.waitTimerText = this.add.text(500, 75, 'Level: ' + this.level, fontStyleLevel);
+    this.waitTimerText.fixedToCamera = true;
+    this.waitTimerText.anchor.setTo(0.5, 0.5);
+
+    this.scoreText = this.add.text(500, 35, 'Score:', fontStyleHeader);
+    this.scoreText.anchor.setTo(0.5, 0.5);
+    this.scoreText.fixedToCamera = true;
+
+    this.scoreTotal = this.add.text(570, 35, this.score, fontStyleText);
+    this.scoreTotal.anchor.setTo(0.5, 0.5);
+    this.scoreTotal.fixedToCamera = true;
+
+    this.timeText = this.add.text(800, 35, 'Time:', fontStyleHeader);
+    this.timeText.fixedToCamera = true;
+    this.timeText.anchor.setTo(0.5, 0.5);
+    this.timerText = this.add.text(880, 35, '00:00', fontStyleText);
+    this.timerText.fixedToCamera = true;
+    this.timerText.anchor.setTo(0.5, 0.5);
+
+
     this.physics.arcade.enable(this.player);
 
     this.player.body.collideWorldBounds = true;
@@ -90,54 +132,39 @@ Game.prototype ={
      this.timerEnemies.loop(2000,this.createEnemy,this);
      this.timerEnemies.start();
 
+     this.timerPowerups = this.game.time.create(false);
+     this.timerPowerups.loop(10000,this.createPowerup,this);
+     this.timerPowerups.start();
+
   },
   update:function(){
+    if(this.gameOver) return;
+
     this.player.body.velocity.set(0);
     for(var i = 0; i < this.enemies.length; i++){
+      if(this.enemies[i] === undefined ) return;
       this.enemies[i].fire();
-      this.physics.arcade.collide(this.player,this.enemies[i].enemy);
+      this.enemies[i].update();
+      this.physics.arcade.overlap(this.player,this.enemies[i].enemy, this.hitPlayer, null, this);
       this.physics.arcade.overlap(this.weapon,this.enemies[i].enemy, this.hitEnemy,null,this);
     }
     this.physics.arcade.overlap(this.enemyBullets,this.player, this.hitPlayer,null,this);
+    this.physics.arcade.overlap(this.powerups,this.player,this.hitPowerup,null,this);
 
     if(game.input.mousePointer.isDown){
-      this.physics.arcade.moveToPointer(this.player, 600);
-      if(Phaser.Rectangle.contains(this.player.body,game.input.x,game.input.y)){
-        this.player.body.velocity.setTo(0,0);
-      }
-    } else{
-      this.player.body.velocity.setTo(0,0);
+      this.physics.arcade.moveToPointer(this.player, 1000);
     }
 
-    if (this.cursors.left.isDown)
-    {
-      this.player.body.velocity.x = -this.speed;
-    }
-    else if (this.cursors.right.isDown)
-    {
-      this.player.body.velocity.x = this.speed;
-    }
-
-    if (this.cursors.up.isDown)
-    {
-      this.player.body.velocity.y = -this.speed;
-    }
-    else if (this.cursors.down.isDown)
-    {
-      this.player.body.velocity.y = this.speed;
-    }
-
-    if (game.input.activePointer.isDown)
-    {
-      //this.weapons[this.currentWeapon].fire(this.player);
       this.weapon.fire(this.player);
-    }
+
     if (this.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
       this.nextWeapon();
     }
+
   },
   nextWeapon: function () {
 
+    console.log('Arma cambiada');
     //  Tidy-up the current weapon
     if (this.currentWeapon > 9)
     {
@@ -161,25 +188,104 @@ Game.prototype ={
     this.weapons[this.currentWeapon].visible = true;
   },
   hitPlayer:function(player,bullet){
-    if(this.player.health < 0){
+    this.loseHeart(player);
+    if(this.player.health <= 0){
+      this.gameOver = true;
+      this.player.kill();
+      this.player.isDead = true;
       this.state.start('GameOver',true,false);
+      return;
     }
-    this.player.health--;
-    console.log(this.player.health);
     bullet.kill();
   },
   hitEnemy:function(enemy, bullet){
     bullet.kill();
-    console.log(enemy);
-    enemy.kill();
+    this.enemies[enemy.index]._kill();
+    this.score += 100;
+    this.scoreTotal.text = this.score;
+    this.enemyCount--;
+
+    if( this.enemyCount === 0){
+      this.levelStarted = false;
+      this.playTime = false;
+      this.startTimerCountdown();
+      this.enemyCount = 20;
+    }
   },
-  fire:function(){
+  hitPowerup: function (player,powerup) {
+    if (this.player.health < 5){
+      this.gainHeart(player);
+    }
+    powerup.kill();
+  },
+  startTimerCountdown: function () {
+    this.waitTimer.add(this.totalSecondsWaitTimer * 1000, this.waitingTimerCountdown, this);
+    this.waitTimer.onComplete.add(this.endedTimerCountdown,this);
+
+    this.level++;
+    this.waitTimerText.text =  'Level: ' + this.level;
+    if( this.level  > 2) { 
+      this.enemyBullets = new Weapon.Beam(game);
+      this.enemySprite = 'enemy2';
+     this.background.destroy();
+      this.background = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'background2');
+      this.background.autoScroll(0, -60);
+		this.game.world.sendToBack(this.background);
+      
+      this.enemyCount = 30;
+    }
+    else if (this.level > 4) {
+      this.enemySprite = 'enemy3';
+      this.enemyBullets = new Weapon.ScaleBullet(game);
+      this.enemyCount = 35;
+      this.background.destroy()
+      this.background = this.add.tileSprite(0, 0, this.game.width, this.game.height, 'background3');
+      this.background.autoScroll(0, -80);
+      this.game.world.sendToBack(this.background);
+      
+    }
+  },
+  waitingTimerCountdown: function () {
+    
+  },
+  endedTimerCountdown: function () {
+    this.waitTimer.stop();
+    this.playTime = true;
+    this.waitTimerText.text = '\n' + 'Move or Shoot to start the level ' + this.level + '!';
+  },
+  gainHeart: function (player) {
+    var position = player.health;
+    if(position == 5) return;
+    this.lives.getChildAt(position).loadTexture('life');
+    player.health++;
   },
   loseHeart: function (player) {
+    var position = player.health - 1;
+    if (position < 0) return;
+    this.lives.getChildAt(position).loadTexture('nolife');
+    player.health--;
   },
   createEnemy: function () {
-    this.enemies.push(new Enemy.Basic(this, this.player, this.enemyBullets,3,game.width/2,10));
+    var index = this.enemies.length;
+    this.enemies.push(new Enemy(index, this, this.player, this.enemyBullets,3, game.world.randomX,10, this.enemySprite));
+  },
+  createPowerup: function () {
+    this.powerups.add(new Powerup.Life(this,game.world.randomX,20));
   },
   resetData: function () {
+    this.background = null;
+    this.foreground = null;
+    this.timerEnemies = null;
+
+    //this.player = null;
+    //  this.weapons = [];
+    //  this.weapon = null;
+
+    this.currentWeapon = 0;
+    this.weaponName = null;
+
+    this.enemies = [];
+    this.enemyBullets = null;
+    this.lives = null;
   }
 };
